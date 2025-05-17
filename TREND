@@ -1,0 +1,57 @@
+//@version=5
+///If you want to use this indicator poperly read the indicator description.
+
+indicator("EXPONOVA by @thejamiul", overlay=true)
+
+// Define the length of the EMAs
+length1 = 20
+length2 = 55
+
+// Calculate the EMAs
+ema1 = ta.ema(close, length1)
+ema2 = ta.ema(close, length2)
+
+// Define your color lists here
+gradient = array.new_color(0)
+array.push(gradient, #f2797d)
+array.push(gradient, #f2837e)
+array.push(gradient, #f38b7f)
+array.push(gradient, #f3957f)
+array.push(gradient, #f49d80)
+array.push(gradient, #f4a781)
+array.push(gradient, #f5af82)
+array.push(gradient, #f5b983)
+array.push(gradient, #f6c184)
+array.push(gradient, #f6cb85)
+array.push(gradient, #f7d386)
+array.push(gradient, #f2d78e)
+array.push(gradient, #eddb96)
+array.push(gradient, #e8df9e)
+array.push(gradient, #e3e2a6)
+array.push(gradient, #dee6ae)
+array.push(gradient, #d9e9b7)
+array.push(gradient, #d4eebf)
+array.push(gradient, #cff1c7)
+array.push(gradient, #caf5cf)
+
+
+// Function to determine if close is above or below ema17
+isCloseAboveEma2(closePrice, ema2) =>
+    closePrice > ema2
+isCloseBelowEma2(closePrice, ema2) =>
+    closePrice < ema2
+
+// Function to pick color based on EMA
+determineFadingColor(closePrice, ema2, colorList) =>
+    barsSinceCross = ta.barssince(closePrice[1] < ema2[1] and closePrice > ema2 or closePrice[1] > ema2[1] and closePrice < ema2)
+    colorIndex = isCloseAboveEma2(closePrice, ema2) ? barsSinceCross : array.size(colorList) - 1 - barsSinceCross
+    colorIndex := math.min(math.max(colorIndex, 0), array.size(colorList) - 1)
+    array.get(colorList, colorIndex)
+
+// Plot the EMAs and store the plot objects, but don't display them
+p1 = plot(ema1, color=color.rgb(202, 245, 207), display=display.none)
+p2 = plot(ema2, color=color.rgb(242, 121, 125), display=display.none)
+
+// Create a band between the two EMAs using the plot objects
+fill(p1, p2, color=determineFadingColor(close, ema2, gradient))
+//fill(p2, p3, color = color.rgb(145, 97, 141) )
